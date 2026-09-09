@@ -4,46 +4,42 @@ declare(strict_types=1);
 
 namespace App;
 
-/**
- * Класс Хелпер для работы с сессией
- */
 class SessionHelper
 {
-    /**
-     * Метод для запуска сессии
-     * @return void
-     */
     public static function start(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_name(Config::sessionName());
+            session_name(Сonfig::sessionName());
             session_start();
         }
     }
 
-    /**
-     * Метод возвращает Id текущего пользователя
-     * @return int|null
-     */
     public static function currentUserId(): ?int
     {
         return $_SESSION['user_id'] ?? null;
     }
 
-    /**
-     * Метод устанавливает Id пользователя для сессии
-     * @param int $userId
-     * @return void
-     */
     public static function setUserId(int $userId): void
     {
         $_SESSION['user_id'] = $userId;
     }
 
-    /**
-     * Метод очистки сессии
-     * @return void
-     */
+    public static function isLoggedIn(): bool
+    {
+        return self::currentUserId() !== null;
+    }
+
+    public static function loginUser(User $user): void
+    {
+        session_regenerate_id(true);
+        self::setUserId($user->id);
+    }
+
+    public static function logout(): void
+    {
+        self::destroy();
+    }
+
     public static function destroy(): void
     {
         $_SESSION = [];
@@ -54,10 +50,10 @@ class SessionHelper
                 session_name(),
                 '',
                 [
-                    'expires' => time() - 3600,
-                    'path' => $params['path'],
-                    'domain' => $params['domain'],
-                    'secure' => $params['secure'],
+                    'expires'  => time() - 3600,
+                    'path'     => $params['path'],
+                    'domain'   => $params['domain'],
+                    'secure'   => $params['secure'],
                     'httponly' => $params['httponly'],
                 ]
             );
