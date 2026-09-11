@@ -9,7 +9,7 @@ class SessionHelper
     public static function start(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_name(Сonfig::sessionName());
+            session_name(Config::sessionName());
             session_start();
         }
     }
