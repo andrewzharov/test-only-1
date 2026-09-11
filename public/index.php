@@ -6,11 +6,20 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\SessionHelper;
 use App\AuthService;
+use App\Helpers;
 
 SessionHelper::start();
 
 $userId = SessionHelper::currentUserId();
-$user = $userId !== null ? AuthService::getById($userId) : null;
+$user = null;
+// Если в сессии хранится ID пользователя, то проверяем в базе
+if ($userId !== null) {
+    $user = AuthService::getById($userId);
+    //Если пользователя нет в базе
+    if ($user === null) {
+        SessionHelper::logout();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -18,18 +27,14 @@ $user = $userId !== null ? AuthService::getById($userId) : null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Главная</title>
-    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 <div class="container">
     <h1>Главная страница</h1>
 
     <?php if ($user): ?>
-        <p>Привет, <?= e($user->getDisplayName()) ?>!</p>
-
-        <?php if ($user->isAdmin()): ?>
-            <p style="color: red;">Режим администратора</p>
-        <?php endif; ?>
+        <p>Привет, <?= Helpers::e($user->getDisplayName()) ?>!</p>
 
         <nav>
             <a href="/profile.php">Профиль</a> |
